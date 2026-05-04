@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package analytics.v1;
+
+option go_package = "github.com/DekuMidBak/gofintracker/gen/go/analytics/v1;analyticsv1";
+
+service AnalyticsService {
+  rpc GetMonthlySummary(GetMonthlySummaryRequest) returns (GetMonthlySummaryResponse);
+  rpc GetCategoryStats(GetCategoryStatsRequest) returns (GetCategoryStatsResponse);
+}
+
+enum AnalyticsTransactionType {
+  ANALYTICS_TRANSACTION_TYPE_UNSPECIFIED = 0;
+  ANALYTICS_TRANSACTION_TYPE_INCOME = 1;
+  ANALYTICS_TRANSACTION_TYPE_EXPENSE = 2;
+}
+
+message GetMonthlySummaryRequest {
+  string user_id = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message GetMonthlySummaryResponse {
+  repeated MonthlyCurrencySummary summaries = 1;
+}
+
+message MonthlyCurrencySummary {
+  string currency = 1;
+  int64 income_amount = 2;
+  int64 expense_amount = 3;
+  int64 balance_amount = 4;
+}
+
+message GetCategoryStatsRequest {
+  string user_id = 1;
+  int32 year = 2;
+  int32 month = 3;
+  optional AnalyticsTransactionType type = 4;
+}
+
+message GetCategoryStatsResponse {
+  repeated CategoryStat stats = 1;
+}
+
+message CategoryStat {
+  string category_id = 1;
+  string currency = 2;
+  AnalyticsTransactionType type = 3;
+  int64 amount = 4;
+}

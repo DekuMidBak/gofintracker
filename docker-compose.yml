@@ -17,6 +17,24 @@ services:
       timeout: 5s
       retries: 10
 
+  user-service:
+    build:
+      context: .
+      dockerfile: docker/user-service.Dockerfile
+    container_name: gofintracker-user-service
+    environment:
+      USER_SERVICE_GRPC_ADDR: :50051
+      USERS_DATABASE_DSN: postgres://gofintracker:gofintracker@postgres:5432/users_db?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-local-env}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   kafka:
     image: apache/kafka:3.7.1
     container_name: gofintracker-kafka

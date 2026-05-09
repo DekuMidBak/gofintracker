@@ -1,0 +1,13 @@
+.git
+.cache
+.env
+.env.*
+!.env.example
+.DS_Store
+tmp
+bin
+dist
+build
+coverage.out
+coverage.html
+*.prof

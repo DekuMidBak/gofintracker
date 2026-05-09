@@ -9,7 +9,7 @@ TRANSACTIONS_DATABASE_DSN ?= postgres://gofintracker:gofintracker@postgres:5432/
 ANALYTICS_DATABASE_DSN ?= postgres://gofintracker:gofintracker@postgres:5432/analytics_db?sslmode=disable
 USERS_TEST_DATABASE_DSN ?= postgres://gofintracker:gofintracker@localhost:5433/users_db?sslmode=disable
 
-.PHONY: test test-integration test-integration-users tidy fmt proto proto-lint up down logs ps migrate-create migrate-up migrate-up-users migrate-up-transactions migrate-up-analytics migrate-down-users migrate-down-transactions migrate-down-analytics
+.PHONY: test test-integration test-integration-users tidy fmt proto proto-lint build up down logs ps migrate-create migrate-up migrate-up-users migrate-up-transactions migrate-up-analytics migrate-down-users migrate-down-transactions migrate-down-analytics
 
 test:
 	go test ./...
@@ -38,6 +38,9 @@ proto-lint:
 	else \
 		echo "No proto files to lint yet"; \
 	fi
+
+build:
+	docker compose build
 
 up:
 	docker compose up -d

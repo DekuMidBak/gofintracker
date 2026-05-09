@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS transactions;
+
+DROP TABLE IF EXISTS categories;
+
+DROP EXTENSION IF EXISTS pgcrypto;

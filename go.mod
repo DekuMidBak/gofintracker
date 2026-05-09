@@ -3,7 +3,9 @@ module github.com/DekuMidBak/gofintracker
 go 1.26
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.9.2
+	golang.org/x/crypto v0.48.0
 	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
 )

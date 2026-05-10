@@ -15,7 +15,7 @@ func TestServiceRegisterCreatesUserAndAccessToken(t *testing.T) {
 	tokens := &fakeTokenManager{}
 	service := NewService(repository, tokens)
 
-	result, err := service.Register(context.Background(), RegisterParams{
+	result, err := service.Register(context.Background(), Credentials{
 		Email:    " USER@Example.COM ",
 		Password: "secret",
 	})
@@ -39,7 +39,7 @@ func TestServiceRegisterCreatesUserAndAccessToken(t *testing.T) {
 func TestServiceRegisterReturnsErrInvalidEmail(t *testing.T) {
 	service := NewService(newFakeRepository(), &fakeTokenManager{})
 
-	_, err := service.Register(context.Background(), RegisterParams{
+	_, err := service.Register(context.Background(), Credentials{
 		Email:    "not-email",
 		Password: "secret",
 	})
@@ -64,7 +64,7 @@ func TestServiceLoginReturnsAccessToken(t *testing.T) {
 	}
 
 	service := NewService(repository, &fakeTokenManager{})
-	result, err := service.Login(context.Background(), LoginParams{
+	result, err := service.Login(context.Background(), Credentials{
 		Email:    "USER@example.com",
 		Password: "secret",
 	})
@@ -80,7 +80,7 @@ func TestServiceLoginReturnsAccessToken(t *testing.T) {
 func TestServiceLoginReturnsErrInvalidCredentialsForMissingUser(t *testing.T) {
 	service := NewService(newFakeRepository(), &fakeTokenManager{})
 
-	_, err := service.Login(context.Background(), LoginParams{
+	_, err := service.Login(context.Background(), Credentials{
 		Email:    "missing@example.com",
 		Password: "secret",
 	})
@@ -103,7 +103,7 @@ func TestServiceLoginReturnsErrInvalidCredentialsForWrongPassword(t *testing.T) 
 	}
 
 	service := NewService(repository, &fakeTokenManager{})
-	_, err = service.Login(context.Background(), LoginParams{
+	_, err = service.Login(context.Background(), Credentials{
 		Email:    "user@example.com",
 		Password: "wrong",
 	})

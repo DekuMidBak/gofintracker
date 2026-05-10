@@ -26,12 +26,7 @@ type Service struct {
 	tokenManager TokenManager
 }
 
-type RegisterParams struct {
-	Email    string
-	Password string
-}
-
-type LoginParams struct {
+type Credentials struct {
 	Email    string
 	Password string
 }
@@ -48,17 +43,17 @@ func NewService(repository Repository, tokenManager TokenManager) *Service {
 	}
 }
 
-func (s *Service) Register(ctx context.Context, params RegisterParams) (AuthResult, error) {
-	email, err := normalizeEmail(params.Email)
+func (s *Service) Register(ctx context.Context, credentials Credentials) (AuthResult, error) {
+	email, err := normalizeEmail(credentials.Email)
 	if err != nil {
 		return AuthResult{}, err
 	}
 
-	if params.Password == "" {
+	if credentials.Password == "" {
 		return AuthResult{}, ErrInvalidPassword
 	}
 
-	passwordHash, err := auth.HashPassword(params.Password)
+	passwordHash, err := auth.HashPassword(credentials.Password)
 	if err != nil {
 		return AuthResult{}, fmt.Errorf("hash password: %w", err)
 	}
@@ -82,8 +77,8 @@ func (s *Service) Register(ctx context.Context, params RegisterParams) (AuthResu
 	}, nil
 }
 
-func (s *Service) Login(ctx context.Context, params LoginParams) (AuthResult, error) {
-	email, err := normalizeEmail(params.Email)
+func (s *Service) Login(ctx context.Context, credentials Credentials) (AuthResult, error) {
+	email, err := normalizeEmail(credentials.Email)
 	if err != nil {
 		return AuthResult{}, err
 	}
@@ -97,7 +92,7 @@ func (s *Service) Login(ctx context.Context, params LoginParams) (AuthResult, er
 		return AuthResult{}, err
 	}
 
-	if err := auth.CheckPassword(found.PasswordHash, params.Password); err != nil {
+	if err := auth.CheckPassword(found.PasswordHash, credentials.Password); err != nil {
 		return AuthResult{}, ErrInvalidCredentials
 	}
 

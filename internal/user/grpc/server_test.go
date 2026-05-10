@@ -32,7 +32,7 @@ func TestServerRegister(t *testing.T) {
 		t.Fatalf("register: %v", err)
 	}
 
-	if service.registerParams.Email != "user@example.com" {
+	if service.registerCredentials.Email != "user@example.com" {
 		t.Fatalf("expected email to be forwarded")
 	}
 
@@ -106,21 +106,21 @@ func TestServerMapsUnknownErrorToInternal(t *testing.T) {
 }
 
 type fakeService struct {
-	registerParams user.RegisterParams
-	registerResult user.AuthResult
-	registerErr    error
+	registerCredentials user.Credentials
+	registerResult      user.AuthResult
+	registerErr         error
 
-	loginParams user.LoginParams
-	loginResult user.AuthResult
-	loginErr    error
+	loginCredentials user.Credentials
+	loginResult      user.AuthResult
+	loginErr         error
 
 	validateToken  string
 	validateUserID string
 	validateErr    error
 }
 
-func (s *fakeService) Register(_ context.Context, params user.RegisterParams) (user.AuthResult, error) {
-	s.registerParams = params
+func (s *fakeService) Register(_ context.Context, credentials user.Credentials) (user.AuthResult, error) {
+	s.registerCredentials = credentials
 	if s.registerErr != nil {
 		return user.AuthResult{}, s.registerErr
 	}
@@ -128,8 +128,8 @@ func (s *fakeService) Register(_ context.Context, params user.RegisterParams) (u
 	return s.registerResult, nil
 }
 
-func (s *fakeService) Login(_ context.Context, params user.LoginParams) (user.AuthResult, error) {
-	s.loginParams = params
+func (s *fakeService) Login(_ context.Context, credentials user.Credentials) (user.AuthResult, error) {
+	s.loginCredentials = credentials
 	if s.loginErr != nil {
 		return user.AuthResult{}, s.loginErr
 	}

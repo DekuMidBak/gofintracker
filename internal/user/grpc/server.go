@@ -13,8 +13,8 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, params user.RegisterParams) (user.AuthResult, error)
-	Login(ctx context.Context, params user.LoginParams) (user.AuthResult, error)
+	Register(ctx context.Context, credentials user.Credentials) (user.AuthResult, error)
+	Login(ctx context.Context, credentials user.Credentials) (user.AuthResult, error)
 	ValidateToken(accessToken string) (string, error)
 }
 
@@ -31,7 +31,7 @@ func NewServer(service Service) *Server {
 }
 
 func (s *Server) Register(ctx context.Context, req *userv1.RegisterRequest) (*userv1.RegisterResponse, error) {
-	result, err := s.service.Register(ctx, user.RegisterParams{
+	result, err := s.service.Register(ctx, user.Credentials{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	})
@@ -47,7 +47,7 @@ func (s *Server) Register(ctx context.Context, req *userv1.RegisterRequest) (*us
 }
 
 func (s *Server) Login(ctx context.Context, req *userv1.LoginRequest) (*userv1.LoginResponse, error) {
-	result, err := s.service.Login(ctx, user.LoginParams{
+	result, err := s.service.Login(ctx, user.Credentials{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	})

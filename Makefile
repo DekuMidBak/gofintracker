@@ -8,16 +8,20 @@ USERS_DATABASE_DSN ?= postgres://gofintracker:gofintracker@postgres:5432/users_d
 TRANSACTIONS_DATABASE_DSN ?= postgres://gofintracker:gofintracker@postgres:5432/transactions_db?sslmode=disable
 ANALYTICS_DATABASE_DSN ?= postgres://gofintracker:gofintracker@postgres:5432/analytics_db?sslmode=disable
 USERS_TEST_DATABASE_DSN ?= postgres://gofintracker:gofintracker@localhost:5433/users_db?sslmode=disable
+TRANSACTIONS_TEST_DATABASE_DSN ?= postgres://gofintracker:gofintracker@localhost:5433/transactions_db?sslmode=disable
 
-.PHONY: test test-integration test-integration-users tidy fmt proto proto-lint build up down logs ps migrate-create migrate-up migrate-up-users migrate-up-transactions migrate-up-analytics migrate-down-users migrate-down-transactions migrate-down-analytics
+.PHONY: test test-integration test-integration-users test-integration-transactions tidy fmt proto proto-lint build up down logs ps migrate-create migrate-up migrate-up-users migrate-up-transactions migrate-up-analytics migrate-down-users migrate-down-transactions migrate-down-analytics
 
 test:
 	go test ./...
 
-test-integration: test-integration-users
+test-integration: test-integration-users test-integration-transactions
 
 test-integration-users:
 	USERS_TEST_DATABASE_DSN="$(USERS_TEST_DATABASE_DSN)" go test ./internal/user/postgres -count=1
+
+test-integration-transactions:
+	TRANSACTIONS_TEST_DATABASE_DSN="$(TRANSACTIONS_TEST_DATABASE_DSN)" go test ./internal/transaction/postgres -count=1
 
 tidy:
 	go mod tidy

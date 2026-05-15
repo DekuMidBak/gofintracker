@@ -45,3 +45,33 @@ func TestTransactionCreatedEventJSON(t *testing.T) {
 		t.Fatalf("expected amount field, got %v", decoded["amount"])
 	}
 }
+
+func TestNewTransactionCreatedEvent(t *testing.T) {
+	created := Transaction{
+		ID:         "transaction-1",
+		UserID:     "user-1",
+		CategoryID: "category-1",
+		Type:       TypeIncome,
+		Amount:     100_000,
+		Currency:   "RUB",
+		OccurredAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC),
+		CreatedAt:  time.Date(2026, 1, 2, 3, 4, 6, 0, time.UTC),
+	}
+
+	event, err := NewTransactionCreatedEvent(created)
+	if err != nil {
+		t.Fatalf("new event: %v", err)
+	}
+
+	if event.EventID == "" {
+		t.Fatal("expected generated event id")
+	}
+
+	if event.TransactionID != created.ID {
+		t.Fatalf("expected transaction id %q, got %q", created.ID, event.TransactionID)
+	}
+
+	if event.UserID != created.UserID {
+		t.Fatalf("expected user id %q, got %q", created.UserID, event.UserID)
+	}
+}

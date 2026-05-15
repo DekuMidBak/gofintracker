@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"strings"
 )
 
@@ -24,11 +25,29 @@ var (
 )
 
 type Service struct {
-	repository Repository
+	repository     Repository
+	eventPublisher EventPublisher
+	logger         *slog.Logger
 }
 
 func NewService(repository Repository) *Service {
-	return &Service{repository: repository}
+	return NewServiceWithEvents(repository, NoopEventPublisher{}, slog.Default())
+}
+
+func NewServiceWithEvents(repository Repository, eventPublisher EventPublisher, logger *slog.Logger) *Service {
+	if eventPublisher == nil {
+		eventPublisher = NoopEventPublisher{}
+	}
+
+	if logger == nil {
+		logger = slog.Default()
+	}
+
+	return &Service{
+		repository:     repository,
+		eventPublisher: eventPublisher,
+		logger:         logger,
+	}
 }
 
 func (s *Service) CreateCategory(ctx context.Context, params CreateCategoryParams) (Category, error) {
@@ -97,7 +116,7 @@ func (s *Service) CreateTransaction(ctx context.Context, params CreateTransactio
 		return Transaction{}, ErrInvalidOccurredAt
 	}
 
-	return s.repository.CreateTransaction(ctx, CreateTransactionParams{
+	created, err := s.repository.CreateTransaction(ctx, CreateTransactionParams{
 		UserID:      userID,
 		CategoryID:  categoryID,
 		Type:        params.Type,
@@ -106,6 +125,13 @@ func (s *Service) CreateTransaction(ctx context.Context, params CreateTransactio
 		Description: strings.TrimSpace(params.Description),
 		OccurredAt:  params.OccurredAt,
 	})
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	s.publishTransactionCreated(ctx, created)
+
+	return created, nil
 }
 
 func (s *Service) ListTransactions(ctx context.Context, filter ListTransactionsFilter) (ListTransactionsResult, error) {
@@ -197,4 +223,21 @@ func normalizeLimit(limit int) (int, error) {
 	}
 
 	return limit, nil
+}
+
+func (s *Service) publishTransactionCreated(ctx context.Context, created Transaction) {
+	event, err := NewTransactionCreatedEvent(created)
+	if err != nil {
+		s.logger.Warn("failed to build transaction created event", "error", err, "transaction_id", created.ID)
+		return
+	}
+
+	if err := s.eventPublisher.PublishTransactionCreated(ctx, event); err != nil {
+		s.logger.Warn(
+			"failed to publish transaction created event",
+			"error", err,
+			"event_id", event.EventID,
+			"transaction_id", event.TransactionID,
+		)
+	}
 }

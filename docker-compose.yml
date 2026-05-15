@@ -43,6 +43,8 @@ services:
     environment:
       TRANSACTION_SERVICE_GRPC_ADDR: :50052
       TRANSACTIONS_DATABASE_DSN: postgres://gofintracker:gofintracker@postgres:5432/transactions_db?sslmode=disable
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TRANSACTION_CREATED_TOPIC: transaction.created
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       LOG_FORMAT: ${LOG_FORMAT:-json}
     ports:
@@ -50,6 +52,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
 
   kafka:
     image: apache/kafka:3.7.1

@@ -76,7 +76,8 @@ func TestServiceCreateCategoryRejectsInvalidInput(t *testing.T) {
 
 func TestServiceCreateTransactionValidatesAndNormalizesInput(t *testing.T) {
 	repository := &fakeRepository{}
-	service := NewService(repository)
+	publisher := &fakeEventPublisher{}
+	service := NewServiceWithEvents(repository, publisher, nil)
 	occurredAt := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 
 	created, err := service.CreateTransaction(context.Background(), CreateTransactionParams{
@@ -98,6 +99,40 @@ func TestServiceCreateTransactionValidatesAndNormalizesInput(t *testing.T) {
 
 	if repository.createTransactionParams.Description != "lunch" {
 		t.Fatalf("expected trimmed description, got %q", repository.createTransactionParams.Description)
+	}
+
+	if !publisher.called {
+		t.Fatal("expected transaction created event to be published")
+	}
+
+	if publisher.event.TransactionID != created.ID {
+		t.Fatalf("expected transaction id %q in event, got %q", created.ID, publisher.event.TransactionID)
+	}
+
+	if publisher.event.Currency != "RUB" {
+		t.Fatalf("expected normalized currency in event, got %q", publisher.event.Currency)
+	}
+}
+
+func TestServiceCreateTransactionIgnoresPublishError(t *testing.T) {
+	repository := &fakeRepository{}
+	publisher := &fakeEventPublisher{err: errors.New("kafka unavailable")}
+	service := NewServiceWithEvents(repository, publisher, nil)
+
+	_, err := service.CreateTransaction(context.Background(), CreateTransactionParams{
+		UserID:     "user-1",
+		CategoryID: "category-1",
+		Type:       TypeExpense,
+		Amount:     1200,
+		Currency:   "RUB",
+		OccurredAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC),
+	})
+	if err != nil {
+		t.Fatalf("expected transaction to stay successful when publish fails, got %v", err)
+	}
+
+	if !publisher.called {
+		t.Fatal("expected publisher to be called")
 	}
 }
 
@@ -271,6 +306,19 @@ type fakeRepository struct {
 	createCategoryParams    CreateCategoryParams
 	createTransactionParams CreateTransactionParams
 	listTransactionsFilter  ListTransactionsFilter
+}
+
+type fakeEventPublisher struct {
+	called bool
+	event  TransactionCreatedEvent
+	err    error
+}
+
+func (p *fakeEventPublisher) PublishTransactionCreated(_ context.Context, event TransactionCreatedEvent) error {
+	p.called = true
+	p.event = event
+
+	return p.err
 }
 
 func (r *fakeRepository) CreateCategory(_ context.Context, params CreateCategoryParams) (Category, error) {

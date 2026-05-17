@@ -57,6 +57,29 @@ services:
       kafka-init:
         condition: service_completed_successfully
 
+  analytics-service:
+    build:
+      context: .
+      dockerfile: docker/analytics-service.Dockerfile
+    container_name: gofintracker-analytics-service
+    environment:
+      ANALYTICS_SERVICE_GRPC_ADDR: :50053
+      ANALYTICS_DATABASE_DSN: postgres://gofintracker:gofintracker@postgres:5432/analytics_db?sslmode=disable
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TRANSACTION_CREATED_TOPIC: transaction.created
+      ANALYTICS_KAFKA_GROUP_ID: analytics-service
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+
   kafka:
     image: apache/kafka:3.7.1
     container_name: gofintracker-kafka

@@ -9,7 +9,7 @@ import (
 )
 
 func TestRouterHealth(t *testing.T) {
-	router := NewRouter(slog.New(slog.NewTextHandler(io.Discard, nil)))
+	router := NewRouter(slog.New(slog.NewTextHandler(io.Discard, nil)), RouterConfig{})
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
@@ -21,7 +21,7 @@ func TestRouterHealth(t *testing.T) {
 }
 
 func TestRouterReturnsNotFound(t *testing.T) {
-	router := NewRouter(slog.New(slog.NewTextHandler(io.Discard, nil)))
+	router := NewRouter(slog.New(slog.NewTextHandler(io.Discard, nil)), RouterConfig{})
 
 	req := httptest.NewRequest(http.MethodGet, "/missing", nil)
 	rec := httptest.NewRecorder()

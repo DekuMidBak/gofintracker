@@ -9,9 +9,23 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(logger *slog.Logger) http.Handler {
+type RouterConfig struct {
+	Clients Clients
+}
+
+type handler struct {
+	clients Clients
+	logger  *slog.Logger
+}
+
+func NewRouter(logger *slog.Logger, config RouterConfig) http.Handler {
 	if logger == nil {
 		logger = slog.Default()
+	}
+
+	handler := handler{
+		clients: config.Clients,
+		logger:  logger,
 	}
 
 	router := chi.NewRouter()
@@ -20,11 +34,13 @@ func NewRouter(logger *slog.Logger) http.Handler {
 	router.Use(requestLogger(logger))
 	router.Use(middleware.Recoverer)
 
-	router.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+	router.Get("/health", handler.health)
 
 	return router
+}
+
+func (h handler) health(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {

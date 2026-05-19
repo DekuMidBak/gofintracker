@@ -35,6 +35,10 @@ func NewRouter(logger *slog.Logger, config RouterConfig) http.Handler {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/health", handler.health)
+	router.Route("/api/v1/auth", func(router chi.Router) {
+		router.Post("/register", handler.register)
+		router.Post("/login", handler.login)
+	})
 
 	return router
 }

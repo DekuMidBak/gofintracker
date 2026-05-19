@@ -158,6 +158,10 @@ type fakeUserClient struct {
 	loginRequest  *userv1.LoginRequest
 	loginResponse *userv1.LoginResponse
 	loginErr      error
+
+	validateRequest  *userv1.ValidateTokenRequest
+	validateResponse *userv1.ValidateTokenResponse
+	validateErr      error
 }
 
 func (c *fakeUserClient) Register(
@@ -187,9 +191,18 @@ func (c *fakeUserClient) Login(
 }
 
 func (c *fakeUserClient) ValidateToken(
-	context.Context,
-	*userv1.ValidateTokenRequest,
-	...grpc.CallOption,
+	_ context.Context,
+	in *userv1.ValidateTokenRequest,
+	_ ...grpc.CallOption,
 ) (*userv1.ValidateTokenResponse, error) {
-	return &userv1.ValidateTokenResponse{}, nil
+	c.validateRequest = in
+	if c.validateErr != nil {
+		return nil, c.validateErr
+	}
+
+	if c.validateResponse == nil {
+		return &userv1.ValidateTokenResponse{}, nil
+	}
+
+	return c.validateResponse, nil
 }

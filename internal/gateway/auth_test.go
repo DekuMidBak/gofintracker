@@ -143,10 +143,14 @@ func TestAuthMapsGRPCErrors(t *testing.T) {
 }
 
 func newTestRouter(users userv1.UserServiceClient) http.Handler {
+	return newTestRouterWithClients(Clients{
+		Users: users,
+	})
+}
+
+func newTestRouterWithClients(clients Clients) http.Handler {
 	return NewRouter(slog.New(slog.NewTextHandler(io.Discard, nil)), RouterConfig{
-		Clients: Clients{
-			Users: users,
-		},
+		Clients: clients,
 	})
 }
 

@@ -39,6 +39,11 @@ func NewRouter(logger *slog.Logger, config RouterConfig) http.Handler {
 		router.Post("/register", handler.register)
 		router.Post("/login", handler.login)
 	})
+	router.Group(func(router chi.Router) {
+		router.Use(handler.requireAuth)
+		router.Post("/api/v1/categories", handler.createCategory)
+		router.Get("/api/v1/categories", handler.listCategories)
+	})
 
 	return router
 }

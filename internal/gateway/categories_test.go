@@ -161,6 +161,18 @@ type fakeTransactionClient struct {
 	listCategoriesRequest  *transactionv1.ListCategoriesRequest
 	listCategoriesResponse *transactionv1.ListCategoriesResponse
 	listCategoriesErr      error
+
+	createTransactionRequest  *transactionv1.CreateTransactionRequest
+	createTransactionResponse *transactionv1.CreateTransactionResponse
+	createTransactionErr      error
+
+	listTransactionsRequest  *transactionv1.ListTransactionsRequest
+	listTransactionsResponse *transactionv1.ListTransactionsResponse
+	listTransactionsErr      error
+
+	getBalanceRequest  *transactionv1.GetBalanceRequest
+	getBalanceResponse *transactionv1.GetBalanceResponse
+	getBalanceErr      error
 }
 
 func (c *fakeTransactionClient) CreateCategory(
@@ -190,25 +202,40 @@ func (c *fakeTransactionClient) ListCategories(
 }
 
 func (c *fakeTransactionClient) CreateTransaction(
-	context.Context,
-	*transactionv1.CreateTransactionRequest,
-	...grpc.CallOption,
+	_ context.Context,
+	in *transactionv1.CreateTransactionRequest,
+	_ ...grpc.CallOption,
 ) (*transactionv1.CreateTransactionResponse, error) {
-	return &transactionv1.CreateTransactionResponse{}, nil
+	c.createTransactionRequest = in
+	if c.createTransactionErr != nil {
+		return nil, c.createTransactionErr
+	}
+
+	return c.createTransactionResponse, nil
 }
 
 func (c *fakeTransactionClient) ListTransactions(
-	context.Context,
-	*transactionv1.ListTransactionsRequest,
-	...grpc.CallOption,
+	_ context.Context,
+	in *transactionv1.ListTransactionsRequest,
+	_ ...grpc.CallOption,
 ) (*transactionv1.ListTransactionsResponse, error) {
-	return &transactionv1.ListTransactionsResponse{}, nil
+	c.listTransactionsRequest = in
+	if c.listTransactionsErr != nil {
+		return nil, c.listTransactionsErr
+	}
+
+	return c.listTransactionsResponse, nil
 }
 
 func (c *fakeTransactionClient) GetBalance(
-	context.Context,
-	*transactionv1.GetBalanceRequest,
-	...grpc.CallOption,
+	_ context.Context,
+	in *transactionv1.GetBalanceRequest,
+	_ ...grpc.CallOption,
 ) (*transactionv1.GetBalanceResponse, error) {
-	return &transactionv1.GetBalanceResponse{}, nil
+	c.getBalanceRequest = in
+	if c.getBalanceErr != nil {
+		return nil, c.getBalanceErr
+	}
+
+	return c.getBalanceResponse, nil
 }

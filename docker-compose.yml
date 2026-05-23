@@ -40,6 +40,45 @@ services:
       timeout: 5s
       retries: 10
 
+  migrate-users:
+    image: migrate/migrate:v4.18.3
+    container_name: gofintracker-migrate-users
+    volumes:
+      - ./migrations/user-service:/migrations:ro
+    command:
+      - -path=/migrations
+      - -database=postgres://gofintracker:gofintracker@postgres:5432/users_db?sslmode=disable
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrate-transactions:
+    image: migrate/migrate:v4.18.3
+    container_name: gofintracker-migrate-transactions
+    volumes:
+      - ./migrations/transaction-service:/migrations:ro
+    command:
+      - -path=/migrations
+      - -database=postgres://gofintracker:gofintracker@postgres:5432/transactions_db?sslmode=disable
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrate-analytics:
+    image: migrate/migrate:v4.18.3
+    container_name: gofintracker-migrate-analytics
+    volumes:
+      - ./migrations/analytics-service:/migrations:ro
+    command:
+      - -path=/migrations
+      - -database=postgres://gofintracker:gofintracker@postgres:5432/analytics_db?sslmode=disable
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   user-service:
     build:
       context: .
@@ -55,8 +94,8 @@ services:
     ports:
       - "50051:50051"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate-users:
+        condition: service_completed_successfully
 
   transaction-service:
     build:
@@ -73,8 +112,8 @@ services:
     ports:
       - "50052:50052"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate-transactions:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
       kafka-init:
@@ -96,8 +135,8 @@ services:
     ports:
       - "50053:50053"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate-analytics:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
       kafka-init:

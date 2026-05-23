@@ -46,6 +46,8 @@ func NewRouter(logger *slog.Logger, config RouterConfig) http.Handler {
 		router.Post("/api/v1/transactions", handler.createTransaction)
 		router.Get("/api/v1/transactions", handler.listTransactions)
 		router.Get("/api/v1/balance", handler.getBalance)
+		router.Get("/api/v1/analytics/monthly", handler.getMonthlyAnalytics)
+		router.Get("/api/v1/analytics/categories", handler.getCategoryAnalytics)
 	})
 
 	return router

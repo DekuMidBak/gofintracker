@@ -8,6 +8,7 @@ import (
 	"github.com/DekuMidBak/gofintracker/internal/app"
 	"github.com/DekuMidBak/gofintracker/internal/config"
 	"github.com/DekuMidBak/gofintracker/internal/logging"
+	"github.com/DekuMidBak/gofintracker/internal/telegrambot"
 )
 
 type serviceConfig struct {
@@ -47,7 +48,11 @@ func run() error {
 		"bot_token_configured", cfg.BotToken != "",
 	)
 
-	<-ctx.Done()
+	telegramClient := telegrambot.NewTelegramClient(cfg.BotToken, nil)
+	bot := telegrambot.NewBot(telegramClient, logger)
+	if err := bot.Run(ctx); err != nil {
+		return fmt.Errorf("run telegram bot: %w", err)
+	}
 
 	logger.Info("stopped telegram-bot")
 	return nil

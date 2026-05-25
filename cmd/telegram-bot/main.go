@@ -49,7 +49,8 @@ func run() error {
 	)
 
 	telegramClient := telegrambot.NewTelegramClient(cfg.BotToken, nil)
-	bot := telegrambot.NewBot(telegramClient, logger)
+	gatewayClient := telegrambot.NewGatewayClient(cfg.GatewayBaseURL, nil)
+	bot := telegrambot.NewBot(telegramClient, gatewayClient, logger)
 	if err := bot.Run(ctx); err != nil {
 		return fmt.Errorf("run telegram bot: %w", err)
 	}

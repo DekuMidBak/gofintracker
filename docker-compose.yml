@@ -22,6 +22,22 @@ services:
       analytics-service:
         condition: service_started
 
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: docker/telegram-bot.Dockerfile
+    container_name: gofintracker-telegram-bot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_GATEWAY_BASE_URL: http://api-gateway:8080
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+    depends_on:
+      api-gateway:
+        condition: service_started
+    profiles:
+      - bot
+
   postgres:
     image: postgres:16-alpine
     container_name: gofintracker-postgres

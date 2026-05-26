@@ -211,6 +211,13 @@ func TestBotMonthlyUsesCommandPeriod(t *testing.T) {
 
 func TestBotCategoryStatsUsesCommandFilters(t *testing.T) {
 	gateway := &fakeGatewayAPI{
+		categories: []Category{
+			{
+				ID:   "category-1",
+				Name: "Food",
+				Type: "expense",
+			},
+		},
 		categoryStats: []CategoryStat{
 			{
 				CategoryID: "category-1",
@@ -224,7 +231,7 @@ func TestBotCategoryStatsUsesCommandFilters(t *testing.T) {
 	bot.sessions[100] = "token-1"
 
 	response := bot.ResponseForText(context.Background(), 100, "/category_stats 2026 5 expense")
-	if !strings.Contains(response, "category-1: expense 25000 RUB") {
+	if !strings.Contains(response, "Food: expense 25000 RUB") {
 		t.Fatalf("unexpected response: %q", response)
 	}
 

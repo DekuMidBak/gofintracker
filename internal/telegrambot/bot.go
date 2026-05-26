@@ -313,12 +313,23 @@ func (b *Bot) handleCategoryStats(ctx context.Context, chatID int64, command Com
 		return "За этот месяц статистики по категориям пока нет."
 	}
 
+	categories, err := b.gateway.ListCategories(ctx, token)
+	if err != nil {
+		return "Не удалось получить категории: " + userError(err)
+	}
+	categoryNames := categoryNamesByID(categories)
+
 	var builder strings.Builder
 	builder.WriteString(fmt.Sprintf("Категории за %04d-%02d:", command.Year, command.Month))
 	for _, stat := range stats {
+		categoryName := categoryNames[stat.CategoryID]
+		if categoryName == "" {
+			categoryName = stat.CategoryID
+		}
+
 		builder.WriteString(fmt.Sprintf(
 			"\n%s: %s %d %s",
-			stat.CategoryID,
+			categoryName,
 			stat.Type,
 			stat.Amount,
 			stat.Currency,
@@ -345,6 +356,15 @@ func findCategory(categories []Category, name string, transactionType string) (C
 	}
 
 	return Category{}, false
+}
+
+func categoryNamesByID(categories []Category) map[string]string {
+	result := make(map[string]string, len(categories))
+	for _, category := range categories {
+		result[category.ID] = category.Name
+	}
+
+	return result
 }
 
 func loginRequiredMessage() string {

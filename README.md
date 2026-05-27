@@ -77,6 +77,8 @@ balance = income - expense
 - `/monthly`;
 - `/category_stats`.
 
+В командах Telegram-бота название категории должно быть одним словом без пробелов, например `Food`, `Salary`, `Taxi`.
+
 ## Стек Технологий
 
 - Go 1.26
@@ -370,4 +372,3 @@ curl -s "http://localhost:8080/api/v1/analytics/categories?year=2026&month=5&typ
 ```
 
 Аналитика обновляется асинхронно через Kafka, поэтому сразу после создания операции может быть небольшая задержка.
-

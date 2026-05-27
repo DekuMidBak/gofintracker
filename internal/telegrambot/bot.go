@@ -11,7 +11,7 @@ import (
 
 const (
 	StartMessage = "Привет! Я GoFinTracker bot. Я помогу вести доходы, расходы, баланс и аналитику."
-	HelpMessage  = "Команды:\n/start\n/help\n/register email password\n/login email password\n/categories\n/add_category income|expense name\n/add_expense amount category description\n/add_income amount category description\n/balance\n/monthly year month\n/category_stats year month income|expense"
+	HelpMessage  = "Команды:\n/start\n/help\n/register email password\n/login email password\n/categories\n/add_category income|expense category\n/add_expense amount category description\n/add_income amount category description\n/balance\n/monthly year month\n/category_stats year month income|expense\n\nНазвание категории должно быть одним словом без пробелов."
 )
 
 type TelegramAPI interface {
@@ -184,7 +184,7 @@ func (b *Bot) handleCategories(ctx context.Context, chatID int64) string {
 		return "Не удалось получить категории: " + userError(err)
 	}
 	if len(categories) == 0 {
-		return "Категорий пока нет. Добавь первую через /add_category income|expense name."
+		return "Категорий пока нет. Добавь первую через /add_category income|expense category. Название категории должно быть одним словом без пробелов."
 	}
 
 	var builder strings.Builder

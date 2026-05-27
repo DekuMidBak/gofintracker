@@ -97,8 +97,8 @@ func parseAuthCommand(name string, args []string) (Command, error) {
 }
 
 func parseAddCategoryCommand(args []string) (Command, error) {
-	if len(args) < 2 {
-		return Command{}, fmt.Errorf("%w: /add_category requires type and name", ErrInvalidCommand)
+	if len(args) != 2 {
+		return Command{}, fmt.Errorf("%w: /add_category requires type and one-word name", ErrInvalidCommand)
 	}
 
 	transactionType := args[0]
@@ -109,7 +109,7 @@ func parseAddCategoryCommand(args []string) (Command, error) {
 	return Command{
 		Name:            CommandAddCategory,
 		TransactionType: transactionType,
-		CategoryName:    strings.Join(args[1:], " "),
+		CategoryName:    args[1],
 		Currency:        DefaultCurrency,
 	}, nil
 }

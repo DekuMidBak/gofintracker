@@ -33,11 +33,11 @@ func TestParseCommand(t *testing.T) {
 		},
 		{
 			name: "add category",
-			text: "/add_category expense Food and cafes",
+			text: "/add_category expense Food",
 			want: Command{
 				Name:            CommandAddCategory,
 				TransactionType: "expense",
-				CategoryName:    "Food and cafes",
+				CategoryName:    "Food",
 				Currency:        DefaultCurrency,
 			},
 		},
@@ -126,6 +126,11 @@ func TestParseCommandRejectsInvalidInput(t *testing.T) {
 		{
 			name:    "invalid transaction type",
 			text:    "/add_category other Food",
+			wantErr: ErrInvalidCommand,
+		},
+		{
+			name:    "category name with spaces",
+			text:    "/add_category expense Food and cafes",
 			wantErr: ErrInvalidCommand,
 		},
 		{

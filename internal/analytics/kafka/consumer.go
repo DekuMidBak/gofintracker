@@ -56,7 +56,7 @@ func (c *Consumer) Run(ctx context.Context) error {
 		}
 
 		if err := c.handleMessage(ctx, message); err != nil {
-			return err
+			c.logger.Warn("failed to handle transaction created event", "error", err)
 		}
 	}
 }

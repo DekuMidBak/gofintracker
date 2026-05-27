@@ -133,19 +133,19 @@ func (h handler) listTransactions(w http.ResponseWriter, r *http.Request) {
 		req.Type = &transactionType
 	}
 
-	limit, err := parseOptionalInt(query.Get("limit"))
+	limit, err := parseOptionalInt32(query.Get("limit"))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid limit")
 		return
 	}
-	req.Limit = int32(limit)
+	req.Limit = limit
 
-	offset, err := parseOptionalInt(query.Get("offset"))
+	offset, err := parseOptionalInt32(query.Get("offset"))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid offset")
 		return
 	}
-	req.Offset = int32(offset)
+	req.Offset = offset
 
 	resp, err := h.clients.Transactions.ListTransactions(r.Context(), req)
 	if err != nil {
@@ -215,12 +215,17 @@ func parseOptionalTime(value string) (time.Time, error) {
 	return time.Parse(time.RFC3339, value)
 }
 
-func parseOptionalInt(value string) (int, error) {
+func parseOptionalInt32(value string) (int32, error) {
 	if value == "" {
 		return 0, nil
 	}
 
-	return strconv.Atoi(value)
+	parsed, err := strconv.ParseInt(value, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(parsed), nil
 }
 
 func toTransactionResponse(item *transactionv1.Transaction) transactionResponse {

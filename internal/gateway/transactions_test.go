@@ -163,6 +163,28 @@ func TestListTransactions(t *testing.T) {
 	}
 }
 
+func TestListTransactionsRejectsLimitOverflow(t *testing.T) {
+	router := newTestRouterWithClients(Clients{
+		Users: &fakeUserClient{
+			validateResponse: &userv1.ValidateTokenResponse{UserId: "user-1"},
+		},
+		Transactions: &fakeTransactionClient{},
+	})
+
+	req := httptest.NewRequest(
+		http.MethodGet,
+		"/api/v1/transactions?limit=2147483648",
+		nil,
+	)
+	req.Header.Set("Authorization", "Bearer access-token")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status 400, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestGetBalance(t *testing.T) {
 	transactions := &fakeTransactionClient{
 		getBalanceResponse: &transactionv1.GetBalanceResponse{
